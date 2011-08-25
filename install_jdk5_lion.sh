@@ -2,6 +2,8 @@
 
 # By the way this script heavily inspired/copied from http://www.s-seven.net/java_15_lion
 # script edited by Brice Dutheil
+# see there in french http://blog.arkey.fr/2011/08/22/script-pour-installer-le-jdk-5-sur-macosx-lion/
+# (there's a translate button)
 
 # Make sure only root can run the script
 if [ $EUID -ne 0 ]; then
