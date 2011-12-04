@@ -1,9 +1,10 @@
 #!/bin/bash
 
 # By the way this script heavily inspired/copied from http://www.s-seven.net/java_15_lion
-# script edited by Brice Dutheil
-# see there in french http://blog.arkey.fr/2011/08/22/script-pour-installer-le-jdk-5-sur-macosx-lion/
-# (there's a translate button)
+# 
+# This script is edited by Brice Dutheil
+# See there in french http://blog.arkey.fr/2011/08/22/script-pour-installer-le-jdk-5-sur-macosx-lion/
+# Translate button is broken for now, please use Google to translate this website.
 
 # Make sure only root can run the script
 if [ $EUID -ne 0 ]; then
@@ -13,12 +14,18 @@ fi
 
 # Make sure the user understand he is all alone if something goes wrong
 echo 'The present script has been tested on my current setup, and far from bulletproof,
- it might not work at all on your system. No uninstall script for now!'
+it might not work at all on your system. And there is *no uninstall script* for now!'
 echo 'Again this scripts touches system files, please be advised you are the sole
- responsible to run or TO NOT run this script on your machine.'
-echo -n 'Proceed ? (y/n)'
+responsible to run or TO NOT run this script on your machine.'
+echo -n 'Do you still want to proceed ? (y/n) '
 read answer
 [ $answer != 'y' ] && echo 'JDK5 Lion Install script aborted' && exit 1
+
+
+# Reminder about Apple JDK updates
+echo 'It seems that when applying a Java update from Apple, some important symbolic names
+that refer to this install are resetted to factory default values, you can just re-apply
+this script.
 
 #some variables
 javapkg='JavaForMacOSX10.5Update10'
@@ -55,7 +62,7 @@ rm -rf $jvmver 2>&1
 
 echo
 echo 'Preparing JavaVM framework'
-echo '========================'
+echo '=========================='
 
 echo
 echo 'Extracting JDK 1.5.0 from package payload in :'
