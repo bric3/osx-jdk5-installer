@@ -23,9 +23,10 @@ read answer
 
 
 # Reminder about Apple JDK updates
-echo 'It seems that when applying a Java update from Apple, some important symbolic names
+echo 'NOTE : It seems that when applying a Java update from Apple, some important symbolic names
 that refer to this install are resetted to factory default values, you can just re-apply
 this script.
+'
 
 #some variables
 javapkg='JavaForMacOSX10.5Update10'
