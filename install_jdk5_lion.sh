@@ -1,19 +1,22 @@
 #!/bin/bash
 
-# By the way this script heavily inspired/copied from http://www.s-seven.net/java_15_lion
-# 
 # This script is edited by Brice Dutheil
 # See there in french http://blog.arkey.fr/2011/08/22/script-pour-installer-le-jdk-5-sur-macosx-lion/
 # Translate button is broken for now, please use Google to translate this website.
 #
-# 2O12/07/29 Added Moutain Lion support => Choose the 64bit JVM !
+# 2O12/07/29 Added Mountain Lion support => Choose the 64bit JVM !
 #            Can dowload the Java DMG itself if not present in same directory
 #            Colored the output a bit, works well on a black background
 #            Added tips for using the different JVMs
-# 2011/12/04 Added warnings and some more information on gotchas
-# 2011/08/25 link to blog post
-# 2011/08/22 initial version
+#            Removed 32bit mode for Mountain Lion (Thanks to Henri Gomez for pointing me to 'ditto')
 #
+# 2011/12/04 Added warnings and some more information on gotchas
+#
+# 2011/08/25 Updated this very comments
+#
+# 2011/08/22 Initial version (Thanks to Benjamin Morin for his blog post)
+#            This script heavily inspired/copied from http://www.s-seven.net/java_15_lion
+
 
 
 
@@ -24,6 +27,7 @@ javadmgurl='http://support.apple.com/downloads/DL1359/en_US/JavaForMacOSX10.5Upd
 javapkg='JavaForMacOSX10.5Update10'
 jvmver='1.5.0_30'
 jvms_path='/System/Library/Java/JavaVirtualMachines'
+java_frmwk_path='/System/Library/Frameworks/JavaVM.framework/Versions'
 pushd `dirname $0` > /dev/null
 script_location=`pwd -P`
 popd > /dev/null
@@ -139,7 +143,7 @@ cd $jvms_path
 pwd
 rm -rf 1.5
 rm -rf 1.5.0
-cd /System/Library/Frameworks/JavaVM.framework/Versions
+cd $java_frmwk_path
 pwd
 rm 1.5/ > /dev/null 2>&1 || rm -rf 1.5 > /dev/null 2>&1
 rm 1.5.0/ > /dev/null 2>&1 || rm -rf 1.5.0 > /dev/null 2>&1
@@ -154,11 +158,11 @@ echo '=========================='
 
 echo
 echo 'Extracting JDK 1.5.0 from package payload in :'
-cd /System/Library/Frameworks/JavaVM.framework/Versions
+cd $java_frmwk_path
 pwd
-gzip -cd /tmp/jdk5pkg/$javapkg.pkg/Payload | pax -r -s                                 \
-		',./System/Library/Frameworks/JavaVM.framework/Versions/1.5.0,./'"$jvmver"','  \
-		'./System/Library/Frameworks/JavaVM.framework/Versions/1.5.0'
+gzip -cd /tmp/jdk5pkg/$javapkg.pkg/Payload | pax -r -s \
+		',.'$java_frmwk_path'/1.5.0,./'$jvmver','      \
+		'.'$java_frmwk_path'/1.5.0'
 ls -Fld 1.5*
 
 rm -rf /tmp/jdk5pkg/
@@ -183,25 +187,27 @@ mkdir ./MacOS
 ln -siv ../Libraries/libjava.jnilib ./MacOS
 
 echo
-echo 'Preparing Java Virtual Machines'
-echo '==============================='
+echo 'Preparing Java Virtual Machine'
+echo '=============================='
 cd $jvms_path
 mkdir -v 1.5.0
 cd 1.5.0
 pwd
-ln -sivh /System/Library/Frameworks/JavaVM.framework/Versions/$jvmver ./Contents
+ln -sivh $java_frmwk_path/$jvmver ./Contents
+
+
+if [ $darwin_version == '12.0.0' ]; then
+    echo $YELLOW'REMINDER : You are using Mountain Lion which is running a 64 bit kernel, this causes segfaults
+when the Java 5 JVM is run in 32 bit mode. For this reason this script removes 32bit mode on this JVM.'$RESET
+
+    ditto --arch x86_64 $java_frmwk_path/$jvmver $java_frmwk_path/$jvmver-x64
+    rm -rf $java_frmwk_path/$jvmver
+    mv $java_frmwk_path/$jvmver-x64 $java_frmwk_path/$jvmver
+fi
 
 echo
 echo 'Almost over...'
 echo
-
-if [ $darwin_version == '12.0.0' ]; then
-    echo $YELLOW'REMINDER : You are using Mountain Lion which is 64 bit only, at this point you 
-have to the select the following entry :'
-    echo $PURPLE'\t"J2SE 5.0\t64-bit"'$YELLOW
-    echo 'in Java Preferences, otherwise you will experience segfaults error with the 32-bit version.'$RESET
-    echo
-fi
 
 echo $BROWN'TIP : If you are using applications that need Java 6, but some other command line apps that require JDK 5 :'
 echo ' - keep the "Java SE 6" entry at the top in "Java Preferences"'
