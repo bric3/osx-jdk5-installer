@@ -60,7 +60,8 @@ fi
 if [ $darwin_version == '12.0.0' ]; then
     echo $YELLOW'=> You are using Mountain Lion, the script has been updated to work, however 
 Mountain Lion kernel works in 64bit. This shouldn'"'"'t be an issue, as the JDK 6 32bit is working,
-however it actually doesn'"'"'t work for this hacky install of JDK 5.'$RED'It means that only the 64bit version will work on your OS.'$RESET
+however it actually doesn'"'"'t work for this hacky install of JDK 5. '$RED'It means that only 
+the 64bit version will work on your OS.'$RESET
     echo
 fi
 echo '=> The present script has been tested on my current setup and is far from 
@@ -78,7 +79,7 @@ values, you can just re-apply this script.'$RESET
 echo
 
 
-echo -n 'Do you still want to proceed ? (y/n)\ '
+echo -n 'Do you still want to proceed ? (y/n) '
 read answer
 [ $answer != 'y' ] && echo 'JDK5 Lion Install script aborted' && exit 1
 echo
@@ -91,11 +92,11 @@ echo
 if [ ! -f $javapkg.dmg ]; then
     echo 'The "Java for Mac OS X 10.5 Update 10" DMG ('"$javapkg.dmg"') was not found.'
 
-    echo 'Now trying to download the DMG file from Apple website :'
+    echo 'Now trying to download the DMG file from Apple website in : '$script_location/$javapkg.dmg
     echo $javadmgurl
-    curl -# -L $javadmgurl -o $javapkg.dmg
+    curl -C - -# -L $javadmgurl -o $script_location/$javapkg.dmg
 
-    if [ ! -f $javapkg.dmg ]; then
+    if [ ! -f $script_location/$javapkg.dmg ]; then
         echo 'Couldn'"'"'t download the uptate. Please download it from Apple at : 
 http://support.apple.com/kb/DL1359'
         echo 'And place it in the same folder as this script : '$script_location
@@ -113,7 +114,7 @@ fi
 echo
 echo 'Extracting Java for Mac OS X package'
 mkdir /tmp/jdk5dmg
-hdiutil attach -quiet -nobrowse -mountpoint /tmp/jdk5dmg/ $javapkg.dmg
+hdiutil attach -quiet -nobrowse -mountpoint /tmp/jdk5dmg/ $script_location/$javapkg.dmg
 cd /tmp/jdk5dmg/
 # too bad pkgutil nor xar cannot stream package content
 pkgutil --expand $javapkg.pkg /tmp/jdk5pkg
@@ -202,7 +203,7 @@ have to the select the following entry :'
     echo
 fi
 
-echo $BROWN'TIP : If you are using applications that need Java 6 :'
+echo $BROWN'TIP : If you are using applications that need Java 6, but some other command line apps that require JDK 5 :'
 echo ' - keep the "Java SE 6" entry at the top in "Java Preferences"'
 echo ' - use the Apple "/usr/libexec/java_home" tool, for example to choose the "J2SE 5.0 64-bit" version :'
 echo $PURPLE'\texport JAVA_HOME=`/usr/libexec/java_home -F -v 1.5 -a x86_64 -d64`'$RESET
