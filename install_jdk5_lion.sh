@@ -15,8 +15,13 @@ fi
 # Make sure the user understand he is all alone if something goes wrong
 echo 'The present script has been tested on my current setup, and far from bulletproof,
 it might not work at all on your system. And there is *no uninstall script* for now!'
-echo 'Again this scripts touches system files, please be advised you are the sole
+echo 'Again this script touches system files, please be advised you are the sole
 responsible to run or TO NOT run this script on your machine.'
+
+if [ `uname -r` == '12.0.0' ]; then
+    echo 'You are using Mountain Lion, this script is not yet ready for it. Reported problems : some paths are missing, Java Preferences do not show Java 1.5, maybe some other issues as well.'
+fi
+
 echo -n 'Do you still want to proceed ? (y/n) '
 read answer
 [ $answer != 'y' ] && echo 'JDK5 Lion Install script aborted' && exit 1
@@ -35,7 +40,8 @@ jvmver='1.5.0_30'
 if [ ! -f $javapkg.dmg ];
 then
     echo 'The "Java for Mac OS X 10.5 Update 10" DMG ('"$javapkg.dmg"') was not found.
- Please download it from Apple at : http://support.apple.com/kb/DL1359'
+ Please download it from Apple at : http://support.apple.com/kb/DL1359
+ And put it in the same folder as this script'
 fi
 
 echo
