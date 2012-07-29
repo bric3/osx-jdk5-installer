@@ -56,13 +56,11 @@ fi
 
 
 
-
-
 # Make sure the user understand he is all alone if something goes wrong
 if [ $darwin_version == '12.0.0' ]; then
     echo $YELLOW'=> You are using Mountain Lion, the script has been updated to work, however 
-Mountain Lion is 64bits only! It means of course that only the 64bit version 
-will work on your OS.'$RESET
+Mountain Lion kernel works in 64bit. This shouldn't be an issue, as the JDK 6 32bit is working,
+however it actually doesn't work for this hacky install of JDK 5.'$RED'It means that only the 64bit version will work on your OS.'$RESET
     echo
 fi
 echo '=> The present script has been tested on my current setup and is far from 
