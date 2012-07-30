@@ -36,8 +36,10 @@ popd > /dev/null
 # 11.0.0 = Lion = 10.7
 darwin_version=`uname -r`
 osx_version=`sw_vers -productVersion`
+test $darwin_version == '12.0.0' && is_mountain_lion=true
 
-# colors
+
+# colors and style
 RESET='\033[00m'
 RED='\033[00;31m'
 BLUE='\033[0;34m'
@@ -45,8 +47,9 @@ PURPLE='\033[0;35m'
 LIGHT_PURPLE='\033[1;35m'
 BROWN='\033[0;33m'
 YELLOW='\033[1;33m'
+UNDERLINED='\033[4m'
 
-# colored echo
+# escape aware echo
 echo() { builtin echo -e $@; }
 
 
@@ -61,7 +64,7 @@ fi
 
 
 # Make sure the user understand he is all alone if something goes wrong
-if [ $darwin_version == '12.0.0' ]; then
+if [ $is_mountain_lion ]; then
     echo $YELLOW'=> You are using Mountain Lion, the script has been updated to work, however 
 Mountain Lion kernel works in 64bit. This shouldn'"'"'t be an issue, as the JDK 6 32bit is working,
 however it actually doesn'"'"'t work for this hacky install of JDK 5. '$RED'It means that only 
@@ -72,36 +75,47 @@ echo '=> The present script has been tested on my current setup and is far from
 bulletproof, it might not work at all on your system. And there is '$RED'*no 
 uninstall script*'$RESET' for now!'
 echo 
-echo '=> Again this script touches system files, please be advised you are the sole
+echo '=> Again '$RED'this script touches system files'$RESET', please be advised you are the sole
 responsible to run or TO NOT run this script on your machine.'
 echo
 
 # Reminder about Apple JDK updates
-echo $LIGHT_BLUE'NOTE 1: It seems that when applying a Java update from Apple, some important 
+echo $YELLOW$UNDERLINED'NOTES :'$RESET
+echo $BROWN'=> It seems that when applying a Java update from Apple, some important 
 symbolic names that refer to this install are resetted to factory default 
 values, you can just re-apply this script.'$RESET
 echo
-echo $LIGHT_BLUE'NOTE 2: For people that where upgrading OS X, it seems this scripts fail to open 
-Java Preferences at the end of the script, '$RED'you have to reinstall Java 6'$LIGHT_BLUE' by 
-launching manually a Java application, then you can run this script.'$RESET
+echo $BROWN'=> For people that where upgrading OS X, it seems this scripts fail to open 
+Java Preferences at the end of the script, with an error like that:'
+echo $PURPLE'\tLSOpenURLsWithRole() failed with error -10810 for the application /Applications/Utilities/Java Preferences.app.'
+echo
+echo $BROWN'If this is happening, '$RED'you have to (re)install Java 6 !'
+echo $BROWN'You can enter these commands yourself in root mode :'
+echo $BROWN'\tsudo rm -rf /System/Library/Java/JavaVirtualMachines/1.6.0.jdk'
+echo '\tsudo rm -rf /System/Library/Java/JavaVirtualMachines'
+echo '\tjava'
+echo $BROWN'This last command will trigger the Java 6 install, then you can run again this script.'$RESET
 echo
 
 echo -n 'Do you still want to proceed ? (y/n) '
 read answer
-[ $answer != 'y' ] && echo 'JDK5 Lion Install script aborted' && exit 1
+[ $answer != 'y' ] && echo 'JDK5 Lion / Mountain Lion Install script aborted' && exit 1
 echo
 
 
 
+echo
+echo $UNDERLINED'Here we go'$RESET
+# ================================
+echo
 
-
-# Here we go
 if [ ! -f $javapkg.dmg ]; then
     echo 'The "Java for Mac OS X 10.5 Update 10" DMG ('"$javapkg.dmg"') was not found.'
-
-    echo 'Now trying to download the DMG file from Apple website in : '$script_location/$javapkg.dmg
-    echo $javadmgurl
+    echo 'Now trying to download the DMG file from Apple website (http://support.apple.com/kb/DL1359).'
+    echo $javadmgurl' -> '$script_location/$javapkg.dmg
+    echo -n $BLUE
     curl -C - -# -L $javadmgurl -o $script_location/$javapkg.dmg
+    echo -n $RESET
 
     if [ ! -f $script_location/$javapkg.dmg ]; then
         echo 'Couldn'"'"'t download the uptate. Please download it from Apple at : 
@@ -156,10 +170,10 @@ rm -rf $jvmver 2>&1
 
 
 echo
-echo 'Preparing JavaVM framework'
-echo '=========================='
-
+echo $UNDERLINED'Preparing JavaVM framework'$RESET
+# ================================================
 echo
+
 echo 'Extracting JDK 1.5.0 from package payload in :'
 cd $java_frmwk_path
 pwd
@@ -173,11 +187,11 @@ rm -rf /tmp/jdk5pkg/
 echo
 echo 'Recreating symbolic links to ./'"$jvmver"' for 1.5 and 1.5.0 :'
 pwd
-ln -sivh ./$jvmver 1.5
-ln -sivh ./$jvmver 1.5.0
+ln -svhF ./$jvmver 1.5
+ln -svhF ./$jvmver 1.5.0
 
 echo
-echo 'Changing values in config files to make JDK work with Lion'
+echo 'Changing values in config files to make JDK work with Lion / Mountain Lion'
 cd $jvmver
 /usr/libexec/PlistBuddy -c "Set :JavaVM:JVMMaximumFrameworkVersion 14.*.*" ./Resources/Info.plist
 /usr/libexec/PlistBuddy -c "Set :JavaVM:JVMMaximumSystemVersion "$osx_version".*" ./Resources/Info.plist
@@ -189,9 +203,12 @@ echo 'Linking Apple native wrapper'
 mkdir ./MacOS
 ln -siv ../Libraries/libjava.jnilib ./MacOS
 
+
+
+
 echo
-echo 'Preparing Java Virtual Machine'
-echo '=============================='
+echo $UNDERLINED'Preparing Java Virtual Machine'$RESET
+# ====================================================
 cd $jvms_path
 mkdir -v 1.5.0
 cd 1.5.0
@@ -199,7 +216,8 @@ pwd
 ln -sivh $java_frmwk_path/$jvmver ./Contents
 
 
-if [ $darwin_version == '12.0.0' ]; then
+if [ $is_mountain_lion ]; then
+    echo
     echo $YELLOW'REMINDER : You are using Mountain Lion which is running a 64 bit kernel, this causes segfaults
 when the Java 5 JVM is run in 32 bit mode. For this reason this script removes 32bit mode on this JVM.'$RESET
 
@@ -208,8 +226,12 @@ when the Java 5 JVM is run in 32 bit mode. For this reason this script removes 3
     mv $java_frmwk_path/$jvmver-x64 $java_frmwk_path/$jvmver
 fi
 
+
+
+
 echo
-echo 'Almost over...'
+echo $UNDERLINED'Almost over...'$RESET
+# ====================================
 echo
 
 echo $BROWN'TIP : If you are using applications that need Java 6, but some other command line apps that require JDK 5 :'
@@ -223,7 +245,9 @@ read -s -n 0 key_press
 echo
 
 echo 'Now check that JDK 5 appears in Java Preference App, if yes the install is successful, otherwise 
-try asking the internet :/'
+try asking the internet :-/'
+echo '(starting here : https://gist.github.com/1163008#comments)'
 echo
 
-open "/Applications/Utilities/Java Preferences.app"
+open -a "/Applications/Utilities/Java Preferences.app"
+
