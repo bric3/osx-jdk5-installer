@@ -77,11 +77,14 @@ responsible to run or TO NOT run this script on your machine.'
 echo
 
 # Reminder about Apple JDK updates
-echo $LIGHT_BLUE'NOTE : It seems that when applying a Java update from Apple, some important 
+echo $LIGHT_BLUE'NOTE 1: It seems that when applying a Java update from Apple, some important 
 symbolic names that refer to this install are resetted to factory default 
 values, you can just re-apply this script.'$RESET
 echo
-
+echo $LIGHT_BLUE'NOTE 2: For people that where upgrading OS X, it seems this scripts fail to open 
+Java Preferences at the end of the script, '$RED'you have to reinstall Java 6'$LIGHT_BLUE' by 
+launching manually a Java application, then you can run this script.'$RESET
+echo
 
 echo -n 'Do you still want to proceed ? (y/n) '
 read answer
@@ -224,4 +227,3 @@ try asking the internet :/'
 echo
 
 open "/Applications/Utilities/Java Preferences.app"
-
