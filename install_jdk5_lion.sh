@@ -249,5 +249,12 @@ try asking the internet :-/'
 echo '(starting here : https://gist.github.com/1163008#comments)'
 echo
 
+echo
+echo $UNDERLINED'/usr/libexec/java_home says :'$RESET
+# ===================================================
+# listing JVMs on local machine
+/usr/libexec/java_home -V
+
+# opening Java Preferences
 open -a "/Applications/Utilities/Java Preferences.app"
 
