@@ -4,6 +4,9 @@
 # See there in french http://blog.arkey.fr/2011/08/22/script-pour-installer-le-jdk-5-sur-macosx-lion/
 # Translate button is broken for now, please use Google to translate this website.
 #
+# 2012/08/25 This script didn't behave correctly when ran on 10.8.1
+#            Added recommendation to always run this script after updates such as Java, XCode, OSX, etc.
+#
 # 2O12/07/29 Added Mountain Lion support => Choose the 64bit JVM !
 #            Can dowload the Java DMG itself if not present in same directory
 #            Colored the output a bit, works well on a black background
@@ -33,10 +36,11 @@ script_location=`pwd -P`
 popd > /dev/null
 
 # 12.0.0 = Mountain Lion = 10.8
+# 12.1.0 = Mountain Lion = 10.8.1
 # 11.0.0 = Lion = 10.7
 darwin_version=`uname -r`
 osx_version=`sw_vers -productVersion`
-test $darwin_version == '12.0.0' && is_mountain_lion=true
+test ${darwin_version/12./} != $darwin_version && is_mountain_lion=true
 
 
 # colors and style
@@ -81,7 +85,11 @@ echo
 
 # Reminder about Apple JDK updates
 echo $YELLOW$UNDERLINED'NOTES :'$RESET
-echo $BROWN'=> It seems that when applying a Java update from Apple, some important 
+echo $BROWN'=> Generally speaking it seems that applying updates on your system Java, XCode, OSX, etc.
+might cause problems with your current install, '$RED'reapply this script after any update if you
+experience issues with your Java 5 install.'$RESET
+echo
+echo $BROWN'=> When applying a Java update from Apple, some important 
 symbolic names that refer to this install are resetted to factory default 
 values, you can just re-apply this script.'$RESET
 echo
@@ -254,6 +262,13 @@ echo $UNDERLINED'/usr/libexec/java_home says :'$RESET
 # ===================================================
 # listing JVMs on local machine
 /usr/libexec/java_home -V
+
+echo
+echo $UNDERLINED'You can also try the java 5 command yourself'$RESET
+# ==================================================================
+# possible commands
+echo '\t/usr/libexec/java_home -F -v 1.5 -a x86_64 --exec java -version'
+echo '\t`/usr/libexec/java_home -F -v 1.5 -a x86_64`/bin/java -version'
 
 # opening Java Preferences
 open -a "/Applications/Utilities/Java Preferences.app"
