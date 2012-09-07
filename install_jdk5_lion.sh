@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # This script is edited by Brice Dutheil
-# See there in french http://blog.arkey.fr/2011/08/22/script-pour-installer-le-jdk-5-sur-macosx-lion/
+# See there in french http://blog.arkey.fr/2012/07/30/script-pour-installer-le-jdk-5-sur-macosx-lion/
 # Translate button is broken for now, please use Google to translate this website.
 #
 # 2012/08/25 This script didn't behave correctly when ran on 10.8.1
@@ -272,4 +272,3 @@ echo '\t`/usr/libexec/java_home -F -v 1.5 -a x86_64`/bin/java -version'
 
 # opening Java Preferences
 open -a "/Applications/Utilities/Java Preferences.app"
-
