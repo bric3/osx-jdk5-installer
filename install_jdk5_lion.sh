@@ -4,6 +4,9 @@
 # See there in french http://blog.arkey.fr/2012/07/30/script-pour-installer-le-jdk-5-sur-macosx-lion/
 # Translate button is broken for now, please use Google to translate this website.
 #
+# 2013/05/11 Added a few more guidance when Java Preferences is not available anymore 
+#            Added a simple example of a JDK switch function.
+#
 # 2012/08/25 This script didn't behave correctly when ran on 10.8.1
 #            Added recommendation to always run this script after updates such as Java, XCode, OSX, etc.
 #
@@ -54,13 +57,13 @@ YELLOW='\033[1;33m'
 UNDERLINED='\033[4m'
 
 # escape aware echo
-echo() { builtin echo -e $@; }
+echo() { builtin echo -e $@; }  
 
 
 
 # Make sure only root can run the script
 if [ $EUID -ne 0 ]; then
-   echo $RED'This script must be run as root!'$RESET 1>&2
+   echo $RED'This script must be run as root in order to install the JDK! If unsure why check the script.'$RESET 1>&2
    exit 1
 fi
 
@@ -96,13 +99,15 @@ echo
 echo $BROWN'=> For people that where upgrading OS X, it seems this scripts fail to open 
 Java Preferences at the end of the script, with an error like that:'
 echo $PURPLE'\tLSOpenURLsWithRole() failed with error -10810 for the application /Applications/Utilities/Java Preferences.app.'
+echo $PURPLE'\tFSPathMakeRef(/Applications/Utilities/Java Preferences.app) failed with error -43.'
 echo
-echo $BROWN'If this is happening, '$RED'you have to (re)install Java 6 !'
-echo $BROWN'You can enter these commands yourself in root mode :'
+echo $BROWN'   If this is happening, '$RED'you have to (re)install Java 6 !'
+echo $BROWN'   You can enter these commands yourself in root mode :'
 echo $BROWN'\tsudo rm -rf /System/Library/Java/JavaVirtualMachines/1.6.0.jdk'
 echo '\tsudo rm -rf /System/Library/Java/JavaVirtualMachines'
 echo '\tjava'
-echo $BROWN'This last command will trigger the Java 6 install, then you can run again this script.'$RESET
+echo 
+echo $BROWN'   This last command will trigger the Java 6 install, then you can run again this script.'$RESET
 echo
 
 echo -n 'Do you still want to proceed ? (y/n) '
@@ -113,7 +118,7 @@ echo
 
 
 echo
-echo $UNDERLINED'Here we go'$RESET
+echo $UNDERLINED'Here we go...'$RESET
 # ================================
 echo
 
@@ -158,7 +163,7 @@ rm -rf /tmp/jdk5dmg/
 # Prepare the System JVM path
 if [ ! -e $jvms_path ]; then
     echo 'Create '$jvms_path', as it does not exist on your system (it might be because 
-you don'"'"' t have another Java install)'
+you don'"'"' t have another Java install).'
     mkdir -v -p $jvms_path
 fi
 
@@ -242,18 +247,33 @@ echo $UNDERLINED'Almost over...'$RESET
 # ====================================
 echo
 
+# opening Java Preferences
+# locate Java Preferences
+java_prefs=`mdfind -onlyin /Applications "Java Preferences.app"`
+
+if [ -d "$java_prefs" ]; then
+    # open -a "/Applications/Utilities/Java Preferences.app"
 echo $BROWN'TIP : If you are using applications that need Java 6, but some other command line apps that require JDK 5 :'
 echo ' - keep the "Java SE 6" entry at the top in "Java Preferences"'
 echo ' - use the Apple "/usr/libexec/java_home" tool, for example to choose the "J2SE 5.0 64-bit" version :'
 echo $PURPLE'\texport JAVA_HOME=`/usr/libexec/java_home -F -v 1.5 -a x86_64 -d64`'$RESET
 echo
 
-echo -n 'Yeah I got it ! (Press Enter)'
-read -s -n 0 key_press
-echo
-
 echo 'Now check that JDK 5 appears in Java Preference App, if yes the install is successful, otherwise 
 try asking the internet :-/'
+
+    open -a "$java_prefs"
+else
+    echo $RED'This script could find the Java Preferences, maybe you moved it elsewhere, or maybe you are running
+a recent version of MacOSX.'$RESET
+
+    echo 'In recents MacOSX, Apple decided to remove the Java Preference app, which means you
+cannot reorder the JDK Preferences, hence you cannot choose JDK5 as a defaukt JDK for the whole OS, 
+you can only specify it in the terminal via the $PATH variable.'
+    echo
+    echo 'Check that /usr/libexec/java_home knows about JDK5, other wise try asking the internet :-/'
+fi
+
 echo '(starting here : https://gist.github.com/1163008#comments)'
 echo
 
@@ -261,7 +281,7 @@ echo
 echo $UNDERLINED'/usr/libexec/java_home says :'$RESET
 # ===================================================
 # listing JVMs on local machine
-/usr/libexec/java_home -V
+echo $(/usr/libexec/java_home -V 2>&1 | sed -E 's,$,\\n,g' | sed -E 's,.*J2SE 5.0.*,\\033[0;33m&\\033[00m,')
 
 echo
 echo $UNDERLINED'You can also try the java 5 command yourself'$RESET
@@ -269,6 +289,43 @@ echo $UNDERLINED'You can also try the java 5 command yourself'$RESET
 # possible commands
 echo '\t/usr/libexec/java_home -F -v 1.5 -a x86_64 --exec java -version'
 echo '\t`/usr/libexec/java_home -F -v 1.5 -a x86_64`/bin/java -version'
+echo
 
-# opening Java Preferences
-open -a "/Applications/Utilities/Java Preferences.app"
+
+
+
+echo -n 'Yeah I got it ! (Press Enter)'
+read -s -n 0 key_press
+echo
+
+echo
+echo
+echo $BROWN'TIP : In a terminal change the java runtime with the correct runtime path in $JAVA_HOME and $PATH'
+echo 'Below is a simple function that you can put in your shell rc (.bashrc, .zshrc, ...) that automates steps
+to switch the JDK to the wanted version. Adapt it to your needs. It uses the Apple tool : /usr/libexec/java_home'
+echo
+# /System/Library/Java/JavaVirtualMachines/1.5.0/Contents/Home/bin
+# /Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/bin
+echo '\tfunction switch_jdk() {'
+echo '\t    local wanted_java_version=$1'
+echo '\t    export JAVA_HOME=`/usr/libexec/java_home -F -v $wanted_java_version -a x86_64 -d64`'
+echo '\t'
+echo '\t    # cleaned PATH'
+echo '\t    export PATH=$(echo $PATH | sed -E "s,(/System)?/Library/Java/JavaVirtualMachines/[a-zA-Z0-9._]+/Contents/Home/bin:,,g")'
+echo '\t'
+echo '\t    # prepend wanted JAVA_HOME'
+echo '\t    export PATH=$JAVA_HOME/bin:$PATH'
+echo '\t'
+echo '\t    echo "Now using : "'
+echo '\t    java -version'
+echo '\t}'
+echo
+
+echo 'And just use it this way :'
+echo '\tswitch_jdk 1.5'
+echo '\tswitch_jdk 1.7'
+
+
+
+echo
+echo $RESET'.'
