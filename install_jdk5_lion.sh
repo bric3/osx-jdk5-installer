@@ -4,6 +4,8 @@
 # See there in french http://blog.arkey.fr/2012/07/30/script-pour-installer-le-jdk-5-sur-macosx-lion/
 # Translate button is broken for now, please use Google to translate this website.
 #
+# 2014/02/10 Updated the script to run on OSX 10.9 Maverick
+#
 # 2013/05/11 Added a few more guidance when Java Preferences is not available anymore 
 #            Added a simple example of a JDK switch function.
 #
@@ -38,23 +40,45 @@ pushd `dirname $0` > /dev/null
 script_location=`pwd -P`
 popd > /dev/null
 
-# 12.0.0 = Mountain Lion = 10.8
+# locate Java Preferences in /Applications
+java_prefs=`mdfind -onlyin /Applications "Java Preferences.app"`
+
+
+
+declare "osxname_14=OS 11"
+declare "osxname_13=Mavericks"
+declare "osxname_12=Mountain Lion"
+declare "osxname_11=Lion"
+
+get_osx_name() {
+  local array="osxname" key=$1
+  local declare_name="${array}_${key}"
+  printf '%s' "${!declare_name}"
+}
+
+# 13.0.0 = Mavericks = 10.9.0
 # 12.1.0 = Mountain Lion = 10.8.1
+# 12.0.0 = Mountain Lion = 10.8
 # 11.0.0 = Lion = 10.7
+
 darwin_version=`uname -r`
 osx_version=`sw_vers -productVersion`
-test ${darwin_version/12./} != $darwin_version && is_mountain_lion=true
+osx_commercial_name=$(get_osx_name ${darwin_version%.[0-9].[0-9]})
+test ${darwin_version/1[2-9]./} != $darwin_version && is_mountain_lion=true
+
 
 
 # colors and style
-RESET='\033[00m'
-RED='\033[00;31m'
-BLUE='\033[0;34m'
-PURPLE='\033[0;35m'
-LIGHT_PURPLE='\033[1;35m'
-BROWN='\033[0;33m'
-YELLOW='\033[1;33m'
-UNDERLINED='\033[4m'
+RESET=`tput sgr0`
+RED=`tput setaf 1`
+BLUE=`tput setaf 4`
+PURPLE=`tput setaf 5`
+GREEN=`tput setaf 2`
+YELLOW=`tput setaf 3`
+UNDERLINED=`tput smul`
+BOLD=`tput bold`
+
+
 
 # escape aware echo
 echo() { builtin echo -e $@; }  
@@ -72,58 +96,60 @@ fi
 
 # Make sure the user understand he is all alone if something goes wrong
 if [ $is_mountain_lion ]; then
-    echo $YELLOW'=> You are using Mountain Lion, the script has been updated to work, however 
-Mountain Lion kernel works in 64bit. This shouldn'"'"'t be an issue, as the JDK 6 32bit is working,
-however it actually doesn'"'"'t work for this hacky install of JDK 5. '$RED'It means that only 
-the 64bit version will work on your OS.'$RESET
+    echo $BLUE'==>'$RESET' You are using '$BOLD$osx_commercial_name$RESET', the script has been updated to work, however 
+'$osx_commercial_name' kernel works in 64bit. This shouldn'"'"'t be an issue, as event the JDK 6 32bit is working,
+however 32bit mode doesn'"'"'t work for this hacky install of JDK 5. '$YELLOW'It means that only 
+the 64bit version of the JDK5 will work on your OS.'$RESET
     echo
 fi
-echo '=> The present script has been tested on my current setup and is far from 
+echo $BLUE'==>'$RESET' The present script has been tested on my current setup and is far from 
 bulletproof, it might not work at all on your system. And there is '$RED'*no 
 uninstall script*'$RESET' for now!'
 echo 
-echo '=> Again '$RED'this script touches system files'$RESET', please be advised you are the sole
-responsible to run or TO NOT run this script on your machine.'
+echo $BLUE'==>'$RESET' Again '$RED'this script touches system files'$RESET', please be advised you are the sole
+responsible to run or '$BOLD'TO NOT'$RESET' run this script on your machine.'
 echo
+
 
 # Reminder about Apple JDK updates
 echo $YELLOW$UNDERLINED'NOTES :'$RESET
-echo $BROWN'=> Generally speaking it seems that applying updates on your system Java, XCode, OSX, etc.
+echo $BLUE'==>'$RESET' Generally speaking it seems that '$YELLOW'applying updates'$RESET' on your system Java, XCode, OSX, etc.
 might cause problems with your current install, '$RED'reapply this script after any update if you
 experience issues with your Java 5 install.'$RESET
-echo
-echo $BROWN'=> When applying a Java update from Apple, some important 
+echo $BLUE'==>'$RESET' When '$YELLOW'applying a Java update from Apple'$RESET', some important 
 symbolic names that refer to this install are resetted to factory default 
 values, you can just re-apply this script.'$RESET
 echo
-echo $BROWN'=> For people that where upgrading OS X, it seems this scripts fail to open 
-Java Preferences at the end of the script, with an error like that:'
+if [[ -n "$java_prefs" && $is_mountain_lion ]]; then
+echo $BLUE'==>'$RESET' For people that where upgrading OS X, it seems this scripts fail to open 
+Java Preferences app at the end of the script, with an error like that:'
 echo $PURPLE'\tLSOpenURLsWithRole() failed with error -10810 for the application /Applications/Utilities/Java Preferences.app.'
 echo $PURPLE'\tFSPathMakeRef(/Applications/Utilities/Java Preferences.app) failed with error -43.'
 echo
-echo $BROWN'   If this is happening, '$RED'you have to (re)install Java 6 !'
-echo $BROWN'   You can enter these commands yourself in root mode :'
-echo $BROWN'\tsudo rm -rf /System/Library/Java/JavaVirtualMachines/1.6.0.jdk'
+echo $YELLOW'   If this is happening, '$RED'you have to (re)install Java 6 !'
+echo $YELLOW'   You can enter these commands yourself in root mode :'
+echo $YELLOW'\tsudo rm -rf /System/Library/Java/JavaVirtualMachines/1.6.0.jdk'
 echo '\tsudo rm -rf /System/Library/Java/JavaVirtualMachines'
 echo '\tjava'
 echo 
-echo $BROWN'   This last command will trigger the Java 6 install, then you can run again this script.'$RESET
+echo $RESET'   This last command will trigger the Java 6 install, then you can run again this script.'$RESET
 echo
+fi
 
-echo -n 'Do you still want to proceed ? (y/n) '
+printf "%s " 'Do you still want to proceed ? (y/n)'
 read answer
-[ $answer != 'y' ] && echo 'JDK5 Lion / Mountain Lion Install script aborted' && exit 1
+[ $answer != 'y' ] && echo 'You'"'"'re fine, JDK5 Hacky Install script has been aborted' && exit 1
 echo
 
 
 
 echo
 echo $UNDERLINED'Here we go...'$RESET
-# ================================
+# ===================================
 echo
 
 if [ ! -f $javapkg.dmg ]; then
-    echo 'The "Java for Mac OS X 10.5 Update 10" DMG ('"$javapkg.dmg"') was not found.'
+    echo 'The "Java for Mac OS X 10.5 Update 10" DMG ('"$javapkg.dmg"') was not found locally.'
     echo 'Now trying to download the DMG file from Apple website (http://support.apple.com/kb/DL1359).'
     echo $javadmgurl' -> '$script_location/$javapkg.dmg
     echo -n $BLUE
@@ -137,7 +163,7 @@ http://support.apple.com/kb/DL1359'
         exit 1
     fi
 else
-    echo 'Using '$javapkg'.dmg file as the "Java for Mac OS X 10.5 Update 10".'
+    echo 'Using '$javapkg'.dmg file to install "Java for Mac OS X 10.5 Update 10".'
 fi
 
 
@@ -204,7 +230,7 @@ ln -svhF ./$jvmver 1.5
 ln -svhF ./$jvmver 1.5.0
 
 echo
-echo 'Changing values in config files to make JDK work with Lion / Mountain Lion'
+echo 'Changing values in config files to make JDK work with '$osx_commercial_name
 cd $jvmver
 /usr/libexec/PlistBuddy -c "Set :JavaVM:JVMMaximumFrameworkVersion 14.*.*" ./Resources/Info.plist
 /usr/libexec/PlistBuddy -c "Set :JavaVM:JVMMaximumSystemVersion "$osx_version".*" ./Resources/Info.plist
@@ -231,7 +257,7 @@ ln -sivh $java_frmwk_path/$jvmver ./Contents
 
 if [ $is_mountain_lion ]; then
     echo
-    echo $YELLOW'REMINDER : You are using Mountain Lion which is running a 64 bit kernel, this causes segfaults
+    echo $BOLD'REMINDER'$RESET' : You are using '$osx_commercial_name' which is running a '$BOLD'64 bit kernel'$RESET', this causes segfaults
 when the Java 5 JVM is run in 32 bit mode. For this reason this script removes 32bit mode on this JVM.'$RESET
 
     ditto --arch x86_64 $java_frmwk_path/$jvmver $java_frmwk_path/$jvmver-x64
@@ -248,12 +274,9 @@ echo $UNDERLINED'Almost over...'$RESET
 echo
 
 # opening Java Preferences
-# locate Java Preferences
-java_prefs=`mdfind -onlyin /Applications "Java Preferences.app"`
-
-if [ -d "$java_prefs" ]; then
+if [ -n "$java_prefs" ]; then
     # open -a "/Applications/Utilities/Java Preferences.app"
-echo $BROWN'TIP : If you are using applications that need Java 6, but some other command line apps that require JDK 5 :'
+echo $BLUE'==> TIP'$YELLOW' : If you are using applications that need Java 6, but some other command line apps that require JDK 5 :'
 echo ' - keep the "Java SE 6" entry at the top in "Java Preferences"'
 echo ' - use the Apple "/usr/libexec/java_home" tool, for example to choose the "J2SE 5.0 64-bit" version :'
 echo $PURPLE'\texport JAVA_HOME=`/usr/libexec/java_home -F -v 1.5 -a x86_64 -d64`'$RESET
@@ -264,7 +287,7 @@ try asking the internet :-/'
 
     open -a "$java_prefs"
 else
-    echo $RED'This script could find the Java Preferences, maybe you moved it elsewhere, or maybe you are running
+    echo $RED'This script could not find the Java Preferences, maybe you moved it elsewhere, or maybe you are running
 a recent version of MacOSX.'$RESET
 
     echo 'In recents MacOSX, Apple decided to remove the Java Preference app, which means you
@@ -274,7 +297,7 @@ you can only specify it in the terminal via the $PATH variable.'
     echo 'Check that /usr/libexec/java_home knows about JDK5, other wise try asking the internet :-/'
 fi
 
-echo '(starting here : https://gist.github.com/1163008#comments)'
+echo '(starting here : '$YELLOW'https://gist.github.com/1163008#comments'$RESET')'
 echo
 
 echo
@@ -283,47 +306,55 @@ echo $UNDERLINED'/usr/libexec/java_home says :'$RESET
 # listing JVMs on local machine
 echo $(/usr/libexec/java_home -V 2>&1 | sed -E 's,$,\\n,g' | sed -E 's,.*J2SE 5.0.*,\\033[0;33m&\\033[00m,')
 
-echo
+echo $UNDERLINED'java -version says :'$RESET
+echo $(/usr/libexec/java_home -F -v 1.5 -a x86_64 --exec java -version 2>&1 | sed -E 's,$,\\n,g' | sed -E 's,java version.*,\\033[0;33m&\\033[00m,')
+echo 
+
 echo $UNDERLINED'You can also try the java 5 command yourself'$RESET
 # ==================================================================
 # possible commands
-echo '\t/usr/libexec/java_home -F -v 1.5 -a x86_64 --exec java -version'
-echo '\t`/usr/libexec/java_home -F -v 1.5 -a x86_64`/bin/java -version'
+echo $GREEN'\t/usr/libexec/java_home -F -v 1.5 -a x86_64 --exec java -version'$RESET
+echo $GREEN'\t`/usr/libexec/java_home -F -v 1.5 -a x86_64`/bin/java -version'$RESET
+echo
+echo 'Don'"'"'forget to update the JAVA_HOME accordingly!'
 echo
 
 
-
-
-echo -n 'Yeah I got it ! (Press Enter)'
+printf "%s" 'Yeah I got it ! (Press Enter) '
 read -s -n 0 key_press
 echo
 
 echo
 echo
-echo $BROWN'TIP : In a terminal change the java runtime with the correct runtime path in $JAVA_HOME and $PATH'
+echo $BLUE'==> TIP'$RESET' : To switch the JDK version in your shell you can use the great '$BOLD'jenv'$RESET' project ('$YELLOW'https://github.com/gcuisinier/jenv'$RESET'), 
+that can easily switch your JDK version globally or per shell or folder.'
+echo 'jenv pretty much covers for the terminal what the Java Preference app did, but in much usable way for terminal users.'
+echo
+echo 'The old school way would be to change the java runtime with the correct runtime path in $JAVA_HOME and $PATH'
 echo 'Below is a simple function that you can put in your shell rc (.bashrc, .zshrc, ...) that automates steps
 to switch the JDK to the wanted version. Adapt it to your needs. It uses the Apple tool : /usr/libexec/java_home'
 echo
 # /System/Library/Java/JavaVirtualMachines/1.5.0/Contents/Home/bin
 # /Library/Java/JavaVirtualMachines/jdk1.7.0_13.jdk/Contents/Home/bin
-echo '\tfunction switch_jdk() {'
-echo '\t    local wanted_java_version=$1'
-echo '\t    export JAVA_HOME=`/usr/libexec/java_home -F -v $wanted_java_version -a x86_64 -d64`'
+echo $GREEN'\tfunction switch_jdk() {'
+echo '\t\tlocal wanted_java_version=$1'
+echo '\t\texport JAVA_HOME=`/usr/libexec/java_home -F -v $wanted_java_version -a x86_64 -d64`'
 echo '\t'
-echo '\t    # cleaned PATH'
-echo '\t    export PATH=$(echo $PATH | sed -E "s,(/System)?/Library/Java/JavaVirtualMachines/[a-zA-Z0-9._]+/Contents/Home/bin:,,g")'
+echo '\t\t# cleaned PATH'
+echo '\t\texport PATH=$(echo $PATH | sed -E "s,(/System)?/Library/Java/JavaVirtualMachines/[a-zA-Z0-9._]+/Contents/Home/bin:,,g")'
 echo '\t'
-echo '\t    # prepend wanted JAVA_HOME'
-echo '\t    export PATH=$JAVA_HOME/bin:$PATH'
+echo '\t\t# prepend wanted JAVA_HOME'
+echo '\t\texport PATH=$JAVA_HOME/bin:$PATH'
 echo '\t'
-echo '\t    echo "Now using : "'
-echo '\t    java -version'
-echo '\t}'
+echo '\t\techo "Now using : "'
+echo '\t\tjava -version'
+echo '\t}'$RESET
 echo
 
 echo 'And just use it this way :'
-echo '\tswitch_jdk 1.5'
-echo '\tswitch_jdk 1.7'
+echo $GREEN'\tswitch_jdk 1.5'$RESET
+echo $GREEN'\tswitch_jdk 1.7.0_45'$RESET
+echo $GREEN'\tswitch_jdk 1.7.0_51'$RESET
 
 
 
