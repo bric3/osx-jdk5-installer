@@ -4,6 +4,10 @@
 # See there in french http://blog.arkey.fr/2012/07/30/script-pour-installer-le-jdk-5-sur-macosx-lion/
 # Translate button is broken for now, please use Google to translate this website.
 #
+# 2015/05/24 Updated the script to run on OSX 10.10.x Yosemite.
+#            This version may not work for older versions of OSX. For other versions 
+#            use https://gist.github.com/bric3/1163008.
+#
 # 2014/02/10 Updated the script to run on OSX 10.9 Maverick
 #
 # 2013/05/11 Added a few more guidance when Java Preferences is not available anymore 
@@ -232,8 +236,8 @@ ln -svhF ./$jvmver 1.5.0
 echo
 echo 'Changing values in config files to make JDK work with '$osx_commercial_name
 cd $jvmver
-/usr/libexec/PlistBuddy -c "Set :JavaVM:JVMMaximumFrameworkVersion 14.*.*" ./Resources/Info.plist
-/usr/libexec/PlistBuddy -c "Set :JavaVM:JVMMaximumSystemVersion "$osx_version".*" ./Resources/Info.plist
+/usr/libexec/PlistBuddy -c "Delete :JavaVM:JVMMaximumFrameworkVersion" ./Resources/Info.plist
+/usr/libexec/PlistBuddy -c "Delete :JavaVM:JVMMaximumSystemVersion" ./Resources/Info.plist
 /usr/libexec/PlistBuddy -c "Add :CFBundleExecutable string libjava.jnilib" ./Resources/Info.plist
 ln -siv ./Resources/Info.plist .
 
