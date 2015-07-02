@@ -42,3 +42,11 @@ French post http://blog.arkey.fr/2012/07/30/script-pour-installer-le-jdk-5-sur-m
 > up to date.
 
 There's valuable comments on that gist!
+
+## LICENSE or WARRANTY
+
+This free for everyone, but if can improve the script this would be very welcome.
+
+**There's NO warranty at all, this can break havoc on your machine.** I am not responsible for any of that that's your responsibility to use this script or not. This script has been working on my machine.
+
+Since I've decided to use updated software, and develop on updated JDK, I don't have to use JDK5 anymore. So that means that I can't provide help anymore. Nor update that script frequently.
