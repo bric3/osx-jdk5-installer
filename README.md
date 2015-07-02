@@ -7,7 +7,9 @@ Automate the install of JDK 5 on Lion, Mountain Lion, Mavericks.
 Apple decided to ship JDK6 with Lion and thus abandonned his own crafted JDK5. Also the Apple JDK5 dmg doesn't
 install anymore on Lion and newer versions of OSX. This script uses technics that have proven useful to get 
 around that.
-At this moment this script has been tested up to Maverics.
+At this moment this script has been tested up to Maverics. Hopefully it can work on later versions of OSX, but eventually Apple will change OSX significantly enough so that these hacks ar eno longer possible.
+
+As a reminder this is an Apple implementation and the Sun implementation is not anymore maintained since quite some time.
 
 ## Script in action
 
