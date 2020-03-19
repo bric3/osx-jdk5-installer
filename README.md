@@ -20,6 +20,7 @@ French post http://blog.arkey.fr/2012/07/30/script-pour-installer-le-jdk-5-sur-m
 
 | Date       | Changes |
 | ---------- | ----------------------------------------------------------------------------------------------- |
+| 2015/05/24 | Updated the script to run on OSX 10.10.x Yosemite. |
 | 2014/02/10 | Updated the script to run on OSX 10.9 Maverick |
 | 2013/05/11 | Added a few more guidance when Java Preferences is not available anymore  |
 |            | Added a simple example of a JDK switch function. |
